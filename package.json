@@ -1,0 +1,13 @@
+{
+  "name": "test-nginx-php",
+  "type": "module",
+  "scripts": {
+    "test": "node test"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "mustache": "^4.2.0",
+    "progress": "^2.0.3",
+    "throttle-debounce": "^3.0.1"
+  }
+}

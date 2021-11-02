@@ -1,0 +1,62 @@
+pid logs/nginx.pid;
+worker_processes 1;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include mime.types;
+    default_type application/octet-stream;
+
+    sendfile on;
+
+    keepalive_timeout 65;
+
+    limit_req_zone $binary_remote_addr zone=limiter:10m rate={{nginx_limit_rps}}r/s;
+
+    upstream php_farm {
+        {{#php_farm}}
+        server 127.0.0.1:{{port}} weight=1;
+        {{/php_farm}}
+    }
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        root html;
+        index index.php;
+
+        charset utf-8;
+
+        location / {
+            try_files $uri @regular_requests;
+        }
+
+        location @regular_requests {
+            limit_req zone=limiter burst={{nginx_limit_burst}} nodelay;
+            try_files $uri $uri/ /index.php$is_args$query_string;        
+        }
+
+        access_log logs/access.log;
+        error_log logs/error.log info;
+
+        sendfile off;
+
+        client_max_body_size 100m;
+
+        location ~ \.php$ {
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_pass php_farm;
+            fastcgi_next_upstream error;
+            fastcgi_next_upstream_tries 1;
+            fastcgi_index index.php;
+            include 'fastcgi.conf';
+            fastcgi_intercept_errors off;
+            fastcgi_buffering off;
+            fastcgi_read_timeout {{nginx_fastcgi_read_timeout}};
+        }
+    }
+
+}
