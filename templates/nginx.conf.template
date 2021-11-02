@@ -49,8 +49,8 @@ http {
         location ~ \.php$ {
             fastcgi_split_path_info ^(.+\.php)(/.+)$;
             fastcgi_pass php_farm;
-            fastcgi_next_upstream error;
-            fastcgi_next_upstream_tries 1;
+            # fastcgi_next_upstream error;
+            # fastcgi_next_upstream_tries 1;
             fastcgi_index index.php;
             include 'fastcgi.conf';
             fastcgi_intercept_errors off;

@@ -18,14 +18,17 @@ RUN choco install -y nodejs
 # set path env var
 RUN setx /M PATH $($Env:PATH + ';C:\tools\php74;C:\tools\nginx-1.21.3;C:\Program Files\nodejs')
 
+# install
+RUN mkdir c:/app
+WORKDIR c:/app
+COPY package.json c:/app
+RUN npm install
+
 # copy web app
 COPY web c:/tools/nginx-1.21.3/html
 
 # copy templates
 COPY templates c:/app/templates
 
-# setup tests
-WORKDIR c:/app
-COPY package.json c:/app
-RUN npm install
+# copy tests
 COPY test c:/app/test
